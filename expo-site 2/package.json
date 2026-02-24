@@ -1,0 +1,9 @@
+{
+  "name": "future-tech-expo-2026",
+  "version": "1.0.0",
+  "description": "未来科技展 2026 专题网站",
+  "scripts": {
+    "deploy": "gh-pages -d ."
+  },
+  "homepage": "https://yourusername.github.io/future-tech-expo-2026"
+}
