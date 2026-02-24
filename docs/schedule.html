@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日程安排 - 未来科技展 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d4ff;
+            --primary-dark: #00a8cc;
+            --secondary: #7c3aed;
+            --accent: #f59e0b;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.05) 0%, transparent 70%);
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .page-header {
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .page-header h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+        }
+
+        .page-header h1 span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+        }
+
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+        }
+
+        .day-tabs {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .day-tab {
+            padding: 1rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .day-tab:hover, .day-tab.active {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .day-tab .date {
+            font-size: 0.875rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+
+        .schedule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .schedule-item {
+            display: flex;
+            gap: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .schedule-item:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateX(4px);
+        }
+
+        .schedule-time {
+            flex-shrink: 0;
+            width: 100px;
+            text-align: center;
+        }
+
+        .schedule-time .time {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .schedule-time .duration {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .schedule-content {
+            flex: 1;
+        }
+
+        .schedule-content h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-content p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .schedule-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        .meta-tag.speaker {
+            background: rgba(124, 58, 237, 0.1);
+            color: var(--secondary);
+        }
+
+        .meta-tag.location {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+        }
+
+        .highlight-session {
+            border-color: rgba(0, 212, 255, 0.3);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(124, 58, 237, 0.05));
+        }
+
+        .highlight-session::before {
+            content: '★ 重点活动';
+            position: absolute;
+            top: -10px;
+            right: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--bg-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .schedule-item {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .schedule-time {
+                width: auto;
+                text-align: left;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .schedule-time .duration {
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">◈ FUTURE TECH 2026</a>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="about.html">关于展会</a></li>
+                <li><a href="exhibitors.html">参展商</a></li>
+                <li><a href="schedule.html" class="active">日程安排</a></li>
+                <li><a href="visit.html">参观指南</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-header">
+        <h1>日程 <span>安排</span></h1>
+        <p>100+场精彩活动，4天科技盛宴</p>
+    </header>
+
+    <main class="content">
+        <div class="day-tabs">
+            <button class="day-tab active">
+                <div>第一天</div>
+                <div class="date">6月15日 周一</div>
+            </button>
+            <button class="day-tab">
+                <div>第二天</div>
+                <div class="date">6月16日 周二</div>
+            </button>
+            <button class="day-tab">
+                <div>第三天</div>
+                <div class="date">6月17日 周三</div>
+            </button>
+            <button class="day-tab">
+                <div>第四天</div>
+                <div class="date">6月18日 周四</div>
+            </button>
+        </div>
+
+        <div class="schedule-list">
+            <div class="schedule-item highlight-session" style="position: relative;">
+                <div class="schedule-time">
+                    <div class="time">09:00</div>
+                    <div class="duration">2小时</div>
+                </div>
+                <div class="schedule-content">
+                    <h3>开幕式暨主题演讲：AI时代的机遇与挑战</h3>
+                    <p>全球科技领袖齐聚一堂，共同探讨人工智能如何重塑产业格局与人类未来。</p>
+                    <div class="schedule-meta">
+                        <span class="meta-tag speaker">👤 特邀嘉宾</span>
+                        <span class="meta-tag location">📍 主会场A厅</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-time">
+                    <div class="time">11:00</div>
+                    <div class="duration">1小时</div>
+                </div>
+                <div class="schedule-content">
+                    <h3>新品发布会：智元科技大模型3.0</h3>
+                    <p>全新多模态大模型首次公开亮相，现场演示文本、图像、视频生成能力。</p>
+                    <div class="schedule-meta">
+                        <span class="meta-tag">🚀 全球首发</span>
+                        <span class="meta-tag location">📍 发布厅B</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-time">
+                    <div class="time">13:30</div>
+                    <div class="duration">1.5小时</div>
+                </div>
+                <div class="schedule-content">
+                    <h3>专题论坛：XR技术的商业化之路</h3>
+                    <p>行业专家深入探讨VR/AR技术在教育、医疗、工业等领域的应用前景。</p>
+                    <div class="schedule-meta">
+                        <span class="meta-tag">🎤 圆桌讨论</span>
+                        <span class="meta-tag location">📍 会议室301</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-time">
+                    <div class="time">15:00</div>
+                    <div class="duration">2小时</div>
+                </div>
+                <div class="schedule-content">
+                    <h3>技术工作坊：构建你的第一个AI应用</h3>
+                    <p>手把手教学，使用开源工具快速搭建智能客服或内容生成应用。</p>
+                    <div class="schedule-meta">
+                        <span class="meta-tag">💻 实操课程</span>
+                        <span class="meta-tag location">📍 工作坊区</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-time">
+                    <div class="time">17:30</div>
+                    <div class="duration">1.5小时</div>
+                </div>
+                <div class="schedule-content">
+                    <h3>创新项目路演：初创企业专场</h3>
+                    <p>10家精选初创企业展示创新项目，与投资人面对面交流。</p>
+                    <div class="schedule-meta">
+                        <span class="meta-tag">💼 投融资</span>
+                        <span class="meta-tag location">📍 投资对接区</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="schedule-item highlight-session" style="position: relative;">
+                <div class="schedule-time">
+                    <div class="time">19:00</div>
+                    <div class="duration">3小时</div>
+                </div>
+                <div class="schedule-content">
+                    <h3>欢迎晚宴暨科技之夜</h3>
+                    <p>高端社交晚宴，与行业领袖、投资人、创业者深度交流，拓展人脉网络。</p>
+                    <div class="schedule-meta">
+                        <span class="meta-tag">🍷 社交活动</span>
+                        <span class="meta-tag location">📍 宴会厅</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 未来科技展 Future Tech Expo · 探索明日世界</p>
+    </footer>
+</body>
+</html>
